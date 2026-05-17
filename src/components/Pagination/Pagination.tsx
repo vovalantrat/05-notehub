@@ -11,11 +11,13 @@ const ReactPaginate = (
 
 interface PaginationProps {
   pageCount: number;
+  currentPage: number;
   onPageChange: (selected: number) => void;
 }
 
 export default function Pagination({
   pageCount,
+  currentPage,
   onPageChange,
 }: PaginationProps) {
   return (
@@ -24,6 +26,7 @@ export default function Pagination({
       pageRangeDisplayed={5}
       marginPagesDisplayed={1}
       onPageChange={({ selected }) => onPageChange(selected + 1)}
+      forcePage={currentPage - 1}
       previousLabel="←"
       nextLabel="→"
       breakLabel="..."

@@ -68,6 +68,7 @@ export default function App() {
         {totalPages > 1 && (
           <Pagination
             pageCount={totalPages}
+            currentPage={page}
             onPageChange={(p) => setPage(p)}
           />
         )}
