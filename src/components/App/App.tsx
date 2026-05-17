@@ -1,16 +1,8 @@
 import { useState } from 'react';
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { useDebouncedCallback } from 'use-debounce';
 
-import {
-  fetchNotes,
-  createNote,
-  deleteNote,
-} from '../../services/noteService';
+import { fetchNotes } from '../../services/noteService';
 
 import NoteList from '../NoteList/NoteList';
 import SearchBox from '../SearchBox/SearchBox';
@@ -25,8 +17,6 @@ export default function App() {
   const [search, setSearch] = useState('');
   const [isOpen, setIsOpen] = useState(false);
 
-  const queryClient = useQueryClient();
-
   const debouncedSearch = useDebouncedCallback((value: string) => {
     setPage(1);
     setSearch(value);
@@ -40,25 +30,11 @@ export default function App() {
         perPage: 12,
         search,
       }),
+    placeholderData: keepPreviousData,
   });
 
   const notes = data?.notes ?? [];
   const totalPages = data?.totalPages ?? 0;
-
-  const createMutation = useMutation({
-    mutationFn: createNote,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notes'] });
-      setIsOpen(false);
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: deleteNote,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['notes'] });
-    },
-  });
 
   return (
     <div className={css.app}>
@@ -87,23 +63,13 @@ export default function App() {
         {isLoading ? (
           <p>Loading...</p>
         ) : (
-          <>
-            {notes.length > 0 && (
-              <NoteList
-                notes={notes}
-                onDelete={deleteMutation.mutate}
-              />
-            )}
-          </>
+          notes.length > 0 && <NoteList notes={notes} />
         )}
       </main>
 
       {isOpen && (
         <Modal onClose={() => setIsOpen(false)}>
-          <NoteForm
-            onSubmit={createMutation.mutate}
-            onClose={() => setIsOpen(false)}
-          />
+          <NoteForm onClose={() => setIsOpen(false)} />
         </Modal>
       )}
     </div>
